@@ -1,0 +1,10 @@
+inherit_from: configs/config_custom_default.yaml
+data:
+ load_cache: false
+ path: "./data/custom_data" #  path: "./data/3RScan_3RScan160/"
+ pcd_file_ending: "_pred_extended_postprocessed.txt" #  path_gt: "./data/3RScan_3RScan160/"
+ test_scans_file: "test_scans.txt" # label_file: "labels.instances.align.annotated.v2.ply"
+ path_test_scans: "$(data.path)/test_scans.txt" # roi_img_path: "${data.path_3rscan}/data/roi_gt/"
+
+
+
