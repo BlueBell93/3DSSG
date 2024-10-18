@@ -154,9 +154,9 @@ logging:
  log_grad_freq: 1000 
  log_graph: True
 wandb:
- dry_run: false
- entity: 'shunchengwu'
- project: "ssg_release"
+ dry_run: true
+ entity: '' # 'shunchengwu' made changes 'bluebell-student'
+ project: "3dssg"
 # id: "001" # id will be set to name
  tags: ["ssg", "3dssg"]
  dir: logs/
