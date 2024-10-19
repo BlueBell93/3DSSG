@@ -9,7 +9,7 @@ import numpy as np
 from ssg import define
 
 class Custom3DSSGDataset(data.Dataset):
-    def __init__(self, config, mode) -> None:
+    def __init__(self, config, mode, gt_inst_seg = False) -> None:
         """
         Initialisiert das Custom3DSSGDataset.
 
@@ -30,6 +30,11 @@ class Custom3DSSGDataset(data.Dataset):
             Modus, in dem das Dataset betrieben wird (z.B. 'train', 'test', 
             'val'). Dies kann für spätere Anpassungen des Verhaltens des 
             Datasets verwendet werden.
+        
+        gt_inst_seg : bool
+            Falls True, wird die GT-Instanzsegmentierungs-Datei geladen.
+            standardmäßig ist Wert auf False gesetzt.
+            Datei hat Endung _gt.txt.
 
         Attributes:
         -----------
@@ -63,13 +68,20 @@ class Custom3DSSGDataset(data.Dataset):
 
         selected_scans : list
             Eine Liste der ausgewählten Scans, die geladen werden.
+        
+        gt_inst_seg: bool
+            Gibt an, ob Punktwolke mit GT Instanzsegmentierung geladen werden soll
         """ 
         super().__init__()
         '''read config'''
         self.cfg = config
         self.mode = mode
         self.path = self.cfg.data.path #"./data/custom_data"
-        self.pcd_file_ending = self.cfg.data.pcd_file_ending #"_pred_extended_postprocessed.txt"
+        self.gt_inst_seg = gt_inst_seg # dann wird _gt.txt geladen (Punktwolke mit GT Instanzsegmentierung)
+        if self.gt_inst_seg:
+            self.pcd_file_ending = "_gt.txt"
+        else: 
+            self.pcd_file_ending = self.cfg.data.pcd_file_ending #"_pred_extended_postprocessed.txt"
         self.test_scans_file = self.cfg.data.test_scans_file  # "test_scans.txt" 
         self.obj_gt_data_file = "instance_gt.txt"# TODO in config nennen
         self.multi_rel_outputs = self.cfg.model.multi_rel #True
@@ -124,7 +136,10 @@ class Custom3DSSGDataset(data.Dataset):
     def __getitem__(self, idx):
         # Schritt 1: ply file anhand des idx auslesen als np Array
         scan_name = self.selected_scans[idx]
-        self.pcd_file_ending = "_gt.txt" # wieder spaeter auskommentieren, dass ist die perfekt instanzsegmentierte pointcloud (gt)
+        
+        # self.pcd_file_ending = "_gt.txt" # wieder spaeter auskommentieren, dass ist die perfekt instanzsegmentierte pointcloud (gt)
+        # path_scan_pcd = os.path.join(self.path, scan_name, scan_name + self.pcd_file_ending) 
+        
         path_scan_pcd = os.path.join(self.path, scan_name, scan_name + self.pcd_file_ending) 
         # print(f"scan_name: {scan_name}")
         # print(f"path_scan_pcd: {path_scan_pcd}")
