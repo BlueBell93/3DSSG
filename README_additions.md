@@ -49,6 +49,7 @@ python batch_inference.py --config configs/config_custom_3DSSG_full_l160.yaml
 
 ## inference_single_sample.py
 - führt Inferenz auf 3DSSG-Datensatz aus
+- Szenengraph-Visualisierung mittels GraphVis 
 - hierfür ``scan_id`` im Code setzen
   - scan_id auf Scan Id setzen, von der man eine Inferenz haben möchte
   - ggf. ``test` oder ``validation``-Dataset setzen, abhängig davon, ob scan_id vom Test oder Validation-Dataset stammt
@@ -59,6 +60,12 @@ python batch_inference.py --config configs/config_custom_3DSSG_full_l160.yaml
   - graphVisualization: Szenengraph-Visualisierung nur mit Vorhersagen
 
 Kann es sein, dass hier die Visualisierung der 3DSSG-Szenengraphen mittels graphviz geschehen?
+
+## graph_visualization.py
+- Szenen-Graph Visualisierung von custom datasets 
+- z.B. von S3DIS-Datensatz
+- lädt gespeicherte pt-files
+(können z.B. von batch_inference.py stammen) und erstellt daraus Graph
 
 ## ssg/dataset
 Enthält einen eigenen Dataloader namens 'custom_dataloader_3DSSG.py'.
