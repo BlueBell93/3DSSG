@@ -47,6 +47,19 @@ Zum Ausführen des Codes:
 python batch_inference.py --config configs/config_custom_3DSSG_full_l160.yaml
 ```
 
+## inference_single_sample.py
+- führt Inferenz auf 3DSSG-Datensatz aus
+- hierfür ``scan_id`` im Code setzen
+  - scan_id auf Scan Id setzen, von der man eine Inferenz haben möchte
+  - ggf. ``test` oder ``validation``-Dataset setzen, abhängig davon, ob scan_id vom Test oder Validation-Dataset stammt
+- generate_sample_info:
+  - gibt HeteroData-Objekt in Konsole aus
+- zwei Funktionen zur Szenengraph-Visualisierung mittels GraphViz
+  - graphVisualization_extended: Szenengraph-Visualisierung allein aus GT-Daten 
+  - graphVisualization: Szenengraph-Visualisierung nur mit Vorhersagen
+
+Kann es sein, dass hier die Visualisierung der 3DSSG-Szenengraphen mittels graphviz geschehen?
+
 ## ssg/dataset
 Enthält einen eigenen Dataloader namens 'custom_dataloader_3DSSG.py'.
 Zur Inferenz eigener Datensätze (z.B. von S3DIS-Instanzsegmentierung). 
