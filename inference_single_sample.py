@@ -138,7 +138,7 @@ def main():
     #scan_id='5341b7a5-8a66-2cdd-8751-70b98263cb8d' # hat nur 3 nodes und 2 edges
 
     #scan_id = 'c7895f2b-339c-2d13-8248-b0507e050314' # hat mit dem auf eval_inst.py nicht uebereingestimmt, also die node predictions # das hier auch nehmen fuer Praesentation
-    scan_id = 'f2c76fe5-2239-29d0-8593-1a2555125595' # hier stimmt es überein # das hier habe ich genommen als Beispiel fuer die Praesentation
+    #scan_id = 'f2c76fe5-2239-29d0-8593-1a2555125595' # hier stimmt es überein # das hier habe ich genommen als Beispiel fuer die Praesentation
     #scan_id = 'c2d99349-1947-2fbf-837e-a0bd5e027c52' # auch problematisch
     #scan_id = '5341b7e3-8a66-2cdd-8709-66a2159f0017'
     #scan_id = '422885b3-192d-25fc-84c9-9b80eea1752d'
@@ -148,6 +148,9 @@ def main():
 
     #scan_id = "787ed58c-9d98-2c97-83b9-b48a609ace15" # hier das koennte aehnlich sein also die Inferenz von mir und denen, da seg und inst dataset gleiche nodes, edges haben
 
+    # id's vor bachelorarbeit
+    #scan_id = 'f2c76fe5-2239-29d0-8593-1a2555125595' # hier stimmt es überein # das hier habe ich genommen als Beispiel fuer die Praesentation
+    scan_id = 'c7895f2b-339c-2d13-8248-b0507e050314'
     '''
     Das hier sollte für scan_id = 5341b7e3-8a66-2cdd-8709-66a2159f0017 heraukommen
     node_cls: tensor([[-14.4228,  -9.7252,  -5.7420,  ..., -30.6674, -16.7381, -23.6346],
@@ -348,7 +351,9 @@ def main():
         #print(f"oid2idx: {oid2idx}")
 
         color_node_correct_prediction = "green" # falls node predictions übereinstimmen
+        color_node_wrong_prediction = "red" # falls node predictions nicht übereinstimmen
         color_edge_correct_prediction = "green" # falls edge predictions übereinstimmen
+        color_edge_no_correct_prediction = "black" # falls edge in GT und Pred vorhanden sind, aber nicht übereinstimmen
         color_edge_partly_correct_prediction = "blue" # falls die edge prediction teilweise übereinstimmt mit GT-Daten
         color_edge_missing_prediction = "orange" # falls edge nicht vorhergesagt wird, es sie aber gibt
         color_edge_wrong_prediction = "red" # falls eine edge, die es nach GT Daten nicht gibt, existiert
@@ -357,7 +362,7 @@ def main():
         comment = "3DSSG: " + scan_id
         dot = graphviz.Digraph(scan_id, comment=comment)  
         # nodes hinzufuegen
-        for obj_id, idx in oid2idx:
+        for obj_id, idx in oid2idx: 
             # GT Daten
             obj_name_gt = obj_names[node_gt[idx]]
             # Predicted Daten
@@ -366,7 +371,7 @@ def main():
             if obj_name_pred == obj_name_gt:
                 dot.node(str(obj_id), text, style = "filled", color = color_node_correct_prediction)
             else:
-                dot.node(str(obj_id), text)
+                dot.node(str(obj_id), text, style = "filled", color = color_node_wrong_prediction)
         #print(dot)
         # edges hinzufuegen
         num_edges = edge_index.shape[1]
@@ -393,27 +398,30 @@ def main():
             if num_indices_gt > 0 and num_indices_pred > 0: # Fall 1: Edge in GT und Pred vorhanden
                  predicate_names_gt = rel_names[indices_gt]
                  predicate_names_pred = rel_names[indices_pred]
+                 print(f"predicate_names_gt: {predicate_names_gt}")
                  label_text = "Pred: "
-                 label_text += ' '.join(predicate_names_pred) 
+                 label_text += ', '.join(predicate_names_pred) 
                  label_text += " (GT: "
-                 label_text += ' '.join(predicate_names_gt) 
+                 label_text += ', '.join(predicate_names_gt) 
                  label_text += ")"
                  if sorted(predicate_names_gt) == sorted(predicate_names_pred): # Fall 1.1: alles ist perfekt
                      dot.edge(str(src_id), str(trgt_id), label_text, color=color_edge_correct_prediction)
-                 else: # Fall 1.2 es ist nicht unbedingt perfekt
+                 elif set(predicate_names_gt).intersection(set(predicate_names_pred)): # Fall 1.2 es ist nicht unbedingt perfekt, aber mind. eine Vorhersage
                      dot.edge(str(src_id), str(trgt_id), label_text, color=color_edge_partly_correct_prediction)
+                 else:
+                     dot.edge(str(src_id), str(trgt_id), label_text, color=color_edge_no_correct_prediction) # edge in GT und Pred vorhanden, aber keine korrekte Prediction
                  pass # fall 1
             elif num_indices_gt > 0: # Fall 2: Edge in GT vorhanden, in Pred nicht
                 predicate_names_gt = rel_names[indices_gt]
                 label_text = "Pred: None (GT:"
-                label_text += ' '.join(predicate_names_gt) 
+                label_text += ', '.join(predicate_names_gt) 
                 label_text += ")"
                 dot.edge(str(src_id), str(trgt_id), label_text, color=color_edge_missing_prediction)
             elif num_indices_pred > 0: # Fall 3: Edge nicht in GT vorhanden, aber in Pred
                 predicate_names_pred = rel_names[indices_pred]
                 label_text = "Pred: "
-                label_text += ' '.join(predicate_names_pred) 
-                label_text += "(GT: None)"
+                label_text += ', '.join(predicate_names_pred) 
+                label_text += " (GT: None)"
                 dot.edge(str(src_id), str(trgt_id), label_text, color=color_edge_wrong_prediction)
 
             # if len(indices_gt) > 0: 
@@ -423,8 +431,8 @@ def main():
             #     label_text += ")"
             #     dot.edge(str(src_id), str(trgt_id), label_text)
         print(dot)
-        dir = "3dssg_" + scan_id + "with_gt_" + file_name # "_graphviz.pdf"
-        #dot.render(directory=dir, view=True) # auskommentieren, falls gespeichert werden soll
+        dir = "3dssg_" + scan_id + "_graphvis_with_gt" #+ file_name # "_graphviz.pdf"
+        dot.render(directory=dir, view=True) # auskommentieren, falls gespeichert werden soll
 
 
 
@@ -467,7 +475,7 @@ def main():
     plt.title('Logits Distribution of 3DSSG Scan with id '+ scan_id)
     file_path = "./experiments/logit_values_relationship_hist_3dssg_" + scan_id + ".png"
     print(f"file_path: {file_path}")
-    plt.savefig(file_path, dpi=300, bbox_inches="tight")
+    #plt.savefig(file_path, dpi=300, bbox_inches="tight")
     # plt.show()
     min_value = torch.min(rel_pred)
     print("Kleinster Logit Wert Relationship:", min_value.item())
@@ -482,7 +490,7 @@ def main():
     file_path = "./experiments/sigmoid_prediction_values_relationship_hist_3dssg_" + scan_id + ".png"
     plt.hist(prob_values, bins=50)
     plt.title('Sigmoid Probabilities Distribution')
-    plt.savefig(file_path, dpi=300, bbox_inches="tight")
+    #plt.savefig(file_path, dpi=300, bbox_inches="tight")
     # plt.show()
     min_value = torch.min(pred_probab_edge_cls)
     print("Kleinster Sigmoid Wert Relationship:", min_value.item())
@@ -497,7 +505,7 @@ def main():
 
     #graphVisualization(sample['node'].oid, sample['node'].y, sample['node', 'to', 'node'].y, sample['node', 'to', 'node'].edge_index, sample.scan_id, classNames, relationNames)    
     
-    #graphVisualization_extended(sample['node'].oid, pred_indices_cls, pred_edge_cls, sample['node'].y, sample['node', 'to', 'node'].y, sample['node', 'to', 'node'].edge_index, sample.scan_id, classNames, relationNames)
+    graphVisualization_extended(sample['node'].oid, pred_indices_cls, pred_edge_cls, sample['node'].y, sample['node', 'to', 'node'].y, sample['node', 'to', 'node'].edge_index, sample.scan_id, classNames, relationNames)
 
     # print("Print Class Predictions Nodes##################################################################################")
     # print(f"cls_pred {cls_pred}")
